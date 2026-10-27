@@ -42,8 +42,18 @@ jobs:
         shell: pwsh
         run: |
           $version = if ($env:GITHUB_REF_NAME -match '^v(\d+\.\d+\.\d+)$') { $Matches[1] } else { '0.0.0' }
-          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
-          & $makensis "/DAPP_VERSION=$version" packaging\TakeoutOrganizer.nsi
+          $makensis = (Get-Command makensis.exe -ErrorAction SilentlyContinue).Source
+          if (-not $makensis) {
+            $candidates = @(
+              (Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'),
+              (Join-Path $env:ProgramFiles 'NSIS\makensis.exe'),
+              (Join-Path $env:ChocolateyInstall 'bin\makensis.exe')
+            )
+            $makensis = $candidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+          }
+          if (-not $makensis) { throw 'NSIS compiler makensis.exe was not found after installation.' }
+          Write-Host "Using NSIS compiler at $makensis"
+          & $makensis /V4 "/DAPP_VERSION=$version" packaging\TakeoutOrganizer.nsi
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload installer artifact
