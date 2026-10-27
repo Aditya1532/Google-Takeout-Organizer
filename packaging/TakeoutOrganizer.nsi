@@ -29,7 +29,7 @@ Section "Google Takeout Organizer" MainSection
   SetShellVarContext current
   SetOutPath "$INSTDIR"
   File "..\dist\GoogleTakeoutOrganizer.exe"
-  File /oname="Getting Started.txt" "..\README.md"
+  File "/oname=Getting Started.txt" "..\README.md"
   CreateDirectory "$SMPROGRAMS\Google Takeout Organizer"
   CreateShortcut "$SMPROGRAMS\Google Takeout Organizer\Google Takeout Organizer.lnk" "$INSTDIR\GoogleTakeoutOrganizer.exe"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
