@@ -8,7 +8,7 @@ A Windows desktop app that brings Google Takeout files from several export folde
 
 ## Download and install
 
-After this project is published, open its **Releases** page and download the latest installer, for example GoogleTakeoutOrganizer-Setup-1.0.0.exe.
+**Windows installer:** [Download Google Takeout Organizer](https://github.com/Aditya1532/Google-Takeout-Organizer/releases/latest/download/GoogleTakeoutOrganizer-Setup.exe)
 
 1. Run the installer. It installs for your Windows account and does not need administrator access or a separate Python installation.
 2. Optionally select a desktop shortcut.
@@ -122,7 +122,7 @@ It writes to sample_data/organized_demo_output_v2/ and leaves the sample source 
 
 ## Build a Windows installer
 
-The GitHub Actions workflow runs the test suite and builds a standalone app with PyInstaller, then creates a per-user setup program with NSIS. Both build tools are free. The workflow stores a downloadable build artifact for branch builds. A version tag such as v1.0.0 also creates a GitHub Release and attaches GoogleTakeoutOrganizer-Setup-1.0.0.exe.
+The GitHub Actions workflow runs the test suite and builds a standalone app with PyInstaller, then creates a per-user setup program with NSIS. Both build tools are free. The workflow stores a downloadable build artifact for branch builds. A version tag such as v1.0.2 also creates a GitHub Release with a stable GoogleTakeoutOrganizer-Setup.exe asset, so the README download link always points to the latest installer.
 
 To build locally, install PyInstaller and NSIS, then run in PowerShell:
 
