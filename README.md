@@ -134,17 +134,9 @@ py -3 -m PyInstaller --clean --noconfirm --onefile --windowed --name GoogleTakeo
 
 The installer is written to dist\GoogleTakeoutOrganizer-Setup-1.0.0.exe.
 
-## Repository setup
+## License
 
-Suggested GitHub repository name: google-takeout-organizer.
-
-Suggested description:
-
-> Safely organize Google Takeout exports into year-based folders with preview, duplicate handling, verified copies, and undo.
-
-Select the **Python** .gitignore template. The project already has a Python-focused .gitignore that also excludes generated builds and sample output logs. Leave GitHub's **Add a README** option off because this project already has a detailed README.
-
-The reference project uses the MIT License. MIT is a good match if you want others to freely use, modify, and redistribute this code while preserving the copyright and license notice. The current project does not yet include a LICENSE file; select MIT only if you intend to grant those permissions. A public GitHub repository without a license does not automatically permit reuse. When the new repository is created with an initial Python .gitignore and MIT license, its first commit will need to be merged with this project's existing local commit before pushing.
+This project is licensed under the MIT License. See LICENSE for the full terms.
 
 ## Project layout
 
