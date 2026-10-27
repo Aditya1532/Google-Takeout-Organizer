@@ -28,7 +28,7 @@ jobs:
       - name: Install free build tools
         run: |
           python -m pip install --upgrade pip pyinstaller
-          choco install innosetup --no-progress -y
+          choco install nsis --no-progress -y
 
       - name: Build standalone application
         shell: pwsh
@@ -42,8 +42,8 @@ jobs:
         shell: pwsh
         run: |
           $version = if ($env:GITHUB_REF_NAME -match '^v(\d+\.\d+\.\d+)$') { $Matches[1] } else { '0.0.0' }
-          $iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
-          & $iscc "/DAppVersion=$version" packaging\TakeoutOrganizer.iss
+          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          & $makensis "/DAPP_VERSION=$version" packaging\TakeoutOrganizer.nsi
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload installer artifact

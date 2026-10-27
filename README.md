@@ -63,13 +63,12 @@ The suite covers dry-run behavior, duplicate names, conflicts, hash verification
 
 ## Build the Windows installer yourself
 
-The app can be bundled into a standalone Windows program with PyInstaller and wrapped in an account-scoped setup wizard with Inno Setup. Both are free tools. In PowerShell from the project folder, run:
+The app can be bundled into a standalone Windows program with PyInstaller and wrapped in a per-user installer with NSIS. Both are free tools. Install PyInstaller and NSIS first, then run in PowerShell from the project folder:
 
 ```powershell
 py -3 -m pip install pyinstaller
 py -3 -m PyInstaller --clean --noconfirm --onefile --windowed --name TakeoutOrganizer --add-data "assets/google-takeout-organizer-logo.png;assets" app.py
-winget install --id JRSoftware.InnoSetup --exact
-& "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" /DAppVersion=1.0.0 packaging\TakeoutOrganizer.iss
+& "${env:ProgramFiles(x86)}\NSIS\makensis.exe" /DAPP_VERSION=1.0.0 packaging\TakeoutOrganizer.nsi
 ```
 
 The installer is written to `dist\TakeoutOrganizer-Setup-1.0.0.exe`. GitHub Actions runs this build on pushes and pull requests. To publish a downloadable release, push a version tag such as `v1.0.0`; the workflow attaches the installer to that GitHub Release. The repository owner must first create a GitHub repository and push this project to it.
