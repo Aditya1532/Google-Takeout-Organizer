@@ -2,7 +2,7 @@
 
 <p align="center"><img src="assets/google-takeout-organizer-logo.png" width="160" alt="Google Takeout Organizer logo"></p>
 
-A Windows desktop app that brings Google Takeout files from several export folders into one year-based library. It keeps photos, videos, PDFs, and other files together by year, with a review step before anything is copied.
+Google Takeout Organizer is a free, open-source Windows 11 app for organizing Google Takeout exports. It combines files from multiple Takeout folders into one year-based library, with review and verified-copy controls before anything is applied.
 
 > Independent community project. Not affiliated with or endorsed by Google.
 
