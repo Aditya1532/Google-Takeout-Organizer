@@ -74,9 +74,12 @@ jobs:
           } finally {
             if (-not $appProcess.HasExited) {
               $null = $appProcess.CloseMainWindow()
-              if (-not $appProcess.WaitForExit(5000)) { Stop-Process -Id $appProcess.Id -Force }
+              if (-not $appProcess.WaitForExit(10000)) { Stop-Process -Id $appProcess.Id -Force }
             }
           }
+          # A one-file PyInstaller app can have a child process; close any test instance by exact executable path.
+          $remainingAppProcesses = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $app })
+          foreach ($process in $remainingAppProcesses) { Stop-Process -Id $process.Id -Force }
           $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/S', "_?=$installDir") -Wait -PassThru
           if ($uninstall.ExitCode -ne 0) { throw "Silent uninstall failed with exit code $($uninstall.ExitCode)." }
           if (Test-Path $app) { throw 'Uninstaller left the application executable behind.' }
