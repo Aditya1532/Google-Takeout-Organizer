@@ -1,0 +1,1 @@
+# Core app uses Python's standard library; no third-party packages are required.
