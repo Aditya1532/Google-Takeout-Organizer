@@ -42,13 +42,13 @@ TASKS = [
 
 class AgePersonaScenarios(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory(dir=Path(__file__).parents[1])
+        self.tmp = tempfile.TemporaryDirectory(dir=Path(__file__).parents[2])
         self.root = Path(self.tmp.name)
         self.source = self.root / "Takeout source"
         self.source.mkdir()
         self.output = self.root / "Organized output"
         self.log = OperationLog(self.output / ".ai-file-organizer" / "operations.jsonl")
-        self.app_text = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
+        self.app_text = (Path(__file__).parents[2] / "app.py").read_text(encoding="utf-8")
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -72,7 +72,7 @@ class AgePersonaScenarios(unittest.TestCase):
                 self.assertIn("2. Output destination", self.app_text)
                 self.assertIn("Add folder(s) / drive", self.app_text)
                 self.assertIn("Choose destination", self.app_text)
-                self.assertTrue((Path(__file__).parents[1] / "assets" / "takeout-organizer-logo.png").is_file())
+                self.assertTrue((Path(__file__).parents[2] / "assets" / "google-takeout-organizer-logo.png").is_file())
                 self.assertIn("Takeout Organizer", self.app_text)
                 self.assertIn('self.root.state("zoomed")', self.app_text)
                 self.assertIn("☀ Light mode", self.app_text)

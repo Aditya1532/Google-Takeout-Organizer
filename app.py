@@ -1,5 +1,6 @@
 """Beginner-friendly desktop interface for Google Takeout Organizer."""
 import os
+import sys
 import threading
 import time
 import ctypes
@@ -95,6 +96,14 @@ class OrganizerApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title("Google Takeout Organizer")
+        # Use the supplied brand image for both the window/taskbar icon and the in-app logo.
+        # PyInstaller extracts bundled assets into _MEIPASS in one-file builds.
+        self.asset_dir = Path(getattr(sys, "_MEIPASS", Path(__file__).parent)) / "assets"
+        try:
+            root.iconbitmap(str(self.asset_dir / "google-takeout-organizer.ico"))
+        except tk.TclError:
+            # Keep the application usable if a non-Windows Tk build cannot load ICO files.
+            pass
         root.geometry("1280x760")
         root.minsize(1024, 620)
         self.dark_mode = False
@@ -211,7 +220,7 @@ class OrganizerApp:
     def _build(self):
         brand = ttk.Frame(self.root, padding=(10, 2, 10, 0))
         brand.pack(fill="x")
-        logo_path = Path(__file__).parent / "assets" / "takeout-organizer-logo.png"
+        logo_path = self.asset_dir / "google-takeout-organizer-logo.png"
         try:
             logo = tk.PhotoImage(file=str(logo_path))
             scale = max(1, (max(logo.width(), logo.height()) + 55) // 56)

@@ -1,11 +1,12 @@
 import os
+import json
 import tempfile
 import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from organizer import Candidate, OperationLog, copy_batch_verified, copy_verified, folder_size_bytes, index_existing_files_by_name, preflight_destination_space, remove_sources_after_verified, scan, undo_last
+from organizer import Candidate, OperationLog, classify, copy_batch_verified, copy_verified, folder_size_bytes, index_existing_files_by_name, preflight_destination_space, remove_sources_after_verified, scan, undo_last
 
 class OrganizerTests(unittest.TestCase):
     def setUp(self):
@@ -110,6 +111,54 @@ class OrganizerTests(unittest.TestCase):
         year_2025 = [r for r in rows if Path(r.destination).parent.name == "2025"]
         self.assertEqual(len(year_2025), 4)
         self.assertEqual({Path(r.destination).suffix for r in year_2025}, {".jpg", ".mp4", ".pdf"})
+
+    def test_takeout_photo_metadata_groups_photo_and_sidecar_by_original_year(self):
+        folder = self.src / "Google Photos"; folder.mkdir()
+        photo = folder / "IMG_001.jpg"
+        photo.write_bytes(b"photo bytes")
+        sidecar = folder / "IMG_001.jpg.json"
+        sidecar.write_text(json.dumps({
+            "title": "IMG_001.jpg",
+            "photoTakenTime": {"timestamp": "1704067200", "formatted": "Jan 1, 2024"},
+            "creationTime": {"timestamp": "1735689600", "formatted": "Jan 1, 2025"},
+        }), encoding="utf-8")
+
+        rows = scan([self.src], self.dest)
+        by_source = {Path(row.source).name: row for row in rows}
+        expected = self.dest / "Data" / "2024"
+        self.assertEqual(Path(by_source[photo.name].destination).parent, expected)
+        self.assertEqual(Path(by_source[sidecar.name].destination).parent, expected)
+        self.assertIn("Google Photos Takeout sidecar date", by_source[photo.name].reason)
+        self.assertIn("Google Photos Takeout sidecar date", by_source[sidecar.name].reason)
+        records, failures, cancelled = copy_batch_verified(rows, self.log)
+        self.assertFalse(failures)
+        self.assertFalse(cancelled)
+        self.assertEqual(len(records), 2)
+        self.assertEqual((expected / photo.name).read_bytes(), photo.read_bytes())
+        self.assertEqual((expected / sidecar.name).read_bytes(), sidecar.read_bytes())
+        self.assertTrue(photo.exists())
+        self.assertTrue(sidecar.exists())
+
+    def test_supplemental_takeout_sidecar_is_paired_with_photo(self):
+        photo = self.src / "Google Photos" / "export.png"
+        photo.parent.mkdir(); photo.write_bytes(b"png bytes")
+        sidecar = photo.with_name(photo.name + ".supplemental-metadata.json")
+        sidecar.write_text(json.dumps({"photoTakenTime": {"timestamp": "1577836800"}}), encoding="utf-8")
+        photo_category, photo_reason = classify(photo)
+        metadata_category, metadata_reason = classify(sidecar)
+        self.assertEqual(photo_category, "Data/2020")
+        self.assertEqual(metadata_category, photo_category)
+        self.assertIn("sidecar date", photo_reason)
+        self.assertIn("sidecar date", metadata_reason)
+
+    def test_invalid_takeout_json_falls_back_without_breaking_scan(self):
+        folder = self.src / "Google Photos"; folder.mkdir()
+        photo = folder / "bad.jpg"; photo.write_bytes(b"image")
+        (folder / "bad.jpg.json").write_text("{broken", encoding="utf-8")
+        rows = scan([self.src], self.dest)
+        by_source = {Path(row.source).name: row for row in rows}
+        self.assertEqual(by_source[photo.name].category, "Photos")
+        self.assertEqual(by_source["bad.jpg.json"].category, "Code")
 
     def test_verified_copy_and_undo(self):
         src = self.src / "report.pdf"; src.write_bytes(b"preserve me")

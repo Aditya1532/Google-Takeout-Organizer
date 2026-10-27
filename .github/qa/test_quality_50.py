@@ -220,21 +220,21 @@ def _case(name):
             c = self.candidate(src); c.replace_existing = True; copy_batch_verified([c], self.log)
             assert undo_last(self.log) == 1 and target.read_bytes() == b"old"
         elif name == "UI offers only the three requested operations":
-            text = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
+            text = (Path(__file__).parents[2] / "app.py").read_text(encoding="utf-8")
             assert text.count('values=("Copy", "Move", "Copy, but delete source")') == 2
         elif name == "UI tab order is output existing review":
-            text = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
+            text = (Path(__file__).parents[2] / "app.py").read_text(encoding="utf-8")
             positions = [text.index('self.tabs.add(self.preview_tab'), text.index('self.tabs.add(self.replace_tab'), text.index('self.tabs.add(self.review_tab')]
             assert positions == sorted(positions)
         elif name == "UI includes existing data copy and move actions":
-            text = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
+            text = (Path(__file__).parents[2] / "app.py").read_text(encoding="utf-8")
             assert "Copy selected existing files into their source folder" in text
             assert "Move selected existing files to source folder" in text
         elif name == "UI asks separately before existing-output move cleanup":
-            text = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
+            text = (Path(__file__).parents[2] / "app.py").read_text(encoding="utf-8")
             assert 'askyesno("Confirm move cleanup"' in text and "copies are verified" in text
         elif name == "launcher hides console and has no paid API dependency":
-            root = Path(__file__).parents[1]
+            root = Path(__file__).parents[2]
             batch = (root / "launch.bat").read_text(encoding="utf-8").casefold()
             hidden = (root / "launch.vbs").read_text(encoding="utf-8").casefold()
             assert "launch.vbs" in batch and "app.py" in hidden
@@ -242,10 +242,10 @@ def _case(name):
             requirements = (root / "requirements.txt").read_text(encoding="utf-8").casefold()
             assert "openai" not in requirements and "api" not in requirements
         elif name == "requirements remain free from paid services":
-            text = (Path(__file__).parents[1] / "requirements.txt").read_text(encoding="utf-8").casefold()
+            text = (Path(__file__).parents[2] / "requirements.txt").read_text(encoding="utf-8").casefold()
             assert "openai" not in text and "api" not in text
         elif name == "existing matches show total count and combined size":
-            text = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
+            text = (Path(__file__).parents[2] / "app.py").read_text(encoding="utf-8")
             assert "Existing output matches:" in text and "unique files" in text and "total" in text
         else:
             raise AssertionError(f"No implementation for scenario: {name}")

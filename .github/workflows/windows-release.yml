@@ -23,7 +23,7 @@ jobs:
           python-version: '3.12'
 
       - name: Run safety test suite
-        run: python -m unittest discover -s tests -v
+        run: python -m unittest discover -s .github/qa -p "test_*.py" -v
 
       - name: Install free build tools
         run: |
@@ -35,7 +35,9 @@ jobs:
         run: >-
           python -m PyInstaller --clean --noconfirm --onefile --windowed
           --name GoogleTakeoutOrganizer
-          --add-data "assets/takeout-organizer-logo.png;assets"
+          --icon assets/google-takeout-organizer.ico
+          --add-data "assets/google-takeout-organizer-logo.png;assets"
+          --add-data "assets/google-takeout-organizer.ico;assets"
           app.py
 
       - name: Build installer

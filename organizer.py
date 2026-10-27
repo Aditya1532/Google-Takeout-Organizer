@@ -10,6 +10,7 @@ import stat
 import tempfile
 import threading
 import time
+from datetime import datetime, timezone
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Callable, Iterable
@@ -180,6 +181,9 @@ def classify(path: Path, ai_classifier: Callable[[Path], str | None] | None = No
         if short_photo_year:
             year = f"20{short_photo_year.group(1)}"
             return f"Data/{year}", f"All file types grouped under Data/{year} from source folder '{part}'"
+    metadata_year = _takeout_photo_year(path)
+    if metadata_year:
+        return f"Data/{metadata_year}", f"Grouped under Data/{metadata_year} using Google Photos Takeout sidecar date"
     for category, extensions in EXTENSIONS.items():
         if ext in extensions:
             return category, f"File extension {ext}"
@@ -198,6 +202,90 @@ def classify(path: Path, ai_classifier: Callable[[Path], str | None] | None = No
         except Exception:
             pass
     return "Review Needed", "No confident local rule matched"
+
+
+def _metadata_sidecar_for_photo(photo: Path) -> Path | None:
+    """Find common Google Photos Takeout JSON sidecar names beside a photo."""
+    candidates = (
+        Path(str(photo) + ".json"),
+        photo.with_name(photo.name + ".supplemental-metadata.json"),
+    )
+    for candidate in candidates:
+        if candidate.is_file() and not is_link_or_junction(candidate):
+            return candidate
+    return None
+
+
+def _photo_for_metadata_sidecar(sidecar: Path) -> Path | None:
+    """Resolve the adjacent photo for filename.json or filename.supplemental-metadata.json."""
+    name = sidecar.name
+    suffix = ".supplemental-metadata.json"
+    if name.casefold().endswith(suffix):
+        photo_name = name[:-len(suffix)]
+    elif name.casefold().endswith(".json"):
+        photo_name = name[:-len(".json")]
+    else:
+        return None
+    photo = sidecar.with_name(photo_name)
+    if photo.suffix.casefold() not in EXTENSIONS["Photos"]:
+        return None
+    if photo.is_file() and not is_link_or_junction(photo):
+        return photo
+    return None
+
+
+def _year_from_takeout_metadata(sidecar: Path) -> str | None:
+    """Read a plausible original photo year from Google's photoTakenTime/creationTime."""
+    try:
+        # Sidecars are small JSON records. Ignore unexpectedly large files instead of
+        # reading unbounded content while scanning an export.
+        if sidecar.stat().st_size > 4 * 1024 * 1024 or is_link_or_junction(sidecar):
+            return None
+        with sidecar.open("r", encoding="utf-8-sig") as stream:
+            metadata = json.load(stream)
+    except (OSError, UnicodeError, json.JSONDecodeError, RecursionError):
+        return None
+    if not isinstance(metadata, dict):
+        return None
+    for field in ("photoTakenTime", "creationTime"):
+        value = metadata.get(field)
+        if not isinstance(value, dict):
+            continue
+        timestamp = value.get("timestamp")
+        if timestamp is not None:
+            try:
+                year = datetime.fromtimestamp(int(timestamp), tz=timezone.utc).year
+                if 1900 <= year <= 2100:
+                    return str(year)
+            except (ValueError, TypeError, OverflowError, OSError):
+                pass
+        # Some Takeout variants retain only an ISO date string.
+        for key in ("dateTime", "formatted"):
+            text = value.get(key)
+            if not isinstance(text, str):
+                continue
+            try:
+                parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+                if 1900 <= parsed.year <= 2100:
+                    return str(parsed.year)
+            except ValueError:
+                continue
+    return None
+
+
+def _takeout_photo_year(path: Path) -> str | None:
+    """Use a paired Google Photos sidecar for a photo or its JSON file."""
+    sidecar: Path | None
+    if path.suffix.casefold() == ".json":
+        # Generic JSON files are not Takeout photo sidecars unless their photo exists.
+        if _photo_for_metadata_sidecar(path) is None:
+            return None
+        sidecar = path
+    elif path.suffix.casefold() in EXTENSIONS["Photos"]:
+        sidecar = _metadata_sidecar_for_photo(path)
+    else:
+        return None
+    return _year_from_takeout_metadata(sidecar) if sidecar else None
 
 def default_locations() -> list[Path]:
     home = Path.home()
