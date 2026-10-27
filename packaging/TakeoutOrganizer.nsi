@@ -8,9 +8,9 @@ SetCompressor /SOLID lzma
 
 !include "MUI2.nsh"
 
-Name "Takeout Organizer"
-OutFile "dist\TakeoutOrganizer-Setup-${APP_VERSION}.exe"
-InstallDir "$LOCALAPPDATA\Programs\Takeout Organizer"
+Name "Google Takeout Organizer"
+OutFile "..\dist\GoogleTakeoutOrganizer-Setup-${APP_VERSION}.exe"
+InstallDir "$LOCALAPPDATA\Programs\Google Takeout Organizer"
 ShowInstDetails show
 ShowUnInstDetails show
 
@@ -24,34 +24,34 @@ ShowUnInstDetails show
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
 
-Section "Takeout Organizer" MainSection
+Section "Google Takeout Organizer" MainSection
   SectionIn RO
   SetShellVarContext current
   SetOutPath "$INSTDIR"
-  File "dist\TakeoutOrganizer.exe"
-  File /oname="Getting Started.txt" "README.md"
-  CreateDirectory "$SMPROGRAMS\Takeout Organizer"
-  CreateShortcut "$SMPROGRAMS\Takeout Organizer\Takeout Organizer.lnk" "$INSTDIR\TakeoutOrganizer.exe"
+  File "..\dist\GoogleTakeoutOrganizer.exe"
+  File /oname="Getting Started.txt" "..\README.md"
+  CreateDirectory "$SMPROGRAMS\Google Takeout Organizer"
+  CreateShortcut "$SMPROGRAMS\Google Takeout Organizer\Google Takeout Organizer.lnk" "$INSTDIR\GoogleTakeoutOrganizer.exe"
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TakeoutOrganizer" "DisplayName" "Takeout Organizer"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TakeoutOrganizer" "DisplayVersion" "${APP_VERSION}"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TakeoutOrganizer" "InstallLocation" "$INSTDIR"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TakeoutOrganizer" "UninstallString" '"$INSTDIR\Uninstall.exe"'
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\GoogleTakeoutOrganizer" "DisplayName" "Google Takeout Organizer"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\GoogleTakeoutOrganizer" "DisplayVersion" "${APP_VERSION}"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\GoogleTakeoutOrganizer" "InstallLocation" "$INSTDIR"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\GoogleTakeoutOrganizer" "UninstallString" '"$INSTDIR\Uninstall.exe"'
 SectionEnd
 
 Section /o "Desktop shortcut" DesktopShortcut
   SetShellVarContext current
-  CreateShortcut "$DESKTOP\Takeout Organizer.lnk" "$INSTDIR\TakeoutOrganizer.exe"
+  CreateShortcut "$DESKTOP\Google Takeout Organizer.lnk" "$INSTDIR\GoogleTakeoutOrganizer.exe"
 SectionEnd
 
 Section "Uninstall"
   SetShellVarContext current
-  Delete "$DESKTOP\Takeout Organizer.lnk"
-  Delete "$SMPROGRAMS\Takeout Organizer\Takeout Organizer.lnk"
-  RMDir "$SMPROGRAMS\Takeout Organizer"
-  Delete "$INSTDIR\TakeoutOrganizer.exe"
+  Delete "$DESKTOP\Google Takeout Organizer.lnk"
+  Delete "$SMPROGRAMS\Google Takeout Organizer\Google Takeout Organizer.lnk"
+  RMDir "$SMPROGRAMS\Google Takeout Organizer"
+  Delete "$INSTDIR\GoogleTakeoutOrganizer.exe"
   Delete "$INSTDIR\Getting Started.txt"
   Delete "$INSTDIR\Uninstall.exe"
   RMDir "$INSTDIR"
-  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TakeoutOrganizer"
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\GoogleTakeoutOrganizer"
 SectionEnd

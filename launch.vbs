@@ -14,6 +14,6 @@ If Err.Number <> 0 Then
     shell.Run "pythonw """ & appPath & """", 0, False
 End If
 If Err.Number <> 0 Then
-    MsgBox "Could not start Takeout Organizer. For the source version, install Python 3.10 or newer and enable the Python Launcher, then try again.", vbExclamation, "Takeout Organizer"
+    MsgBox "Could not start Google Takeout Organizer. For the source version, install Python 3.10 or newer and enable the Python Launcher, then try again.", vbExclamation, "Google Takeout Organizer"
 End If
 On Error GoTo 0

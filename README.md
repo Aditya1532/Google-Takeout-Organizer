@@ -1,74 +1,159 @@
-# Takeout Organizer for Windows 11
+# Google Takeout Organizer
 
-![Google Takeout Organizer logo](assets/google-takeout-organizer-logo.png)
+<p align="center"><img src="assets/takeout-organizer-logo.png" width="160" alt="Google Takeout Organizer logo"></p>
 
-A beginner-friendly desktop app for organizing Google Takeout files by year while keeping different media and document types together. The app uses Python's built-in Tkinter interface and standard library. It needs no paid API and makes no network requests while organizing files.
+A Windows desktop app that brings Google Takeout files from several export folders into one year-based library. It keeps photos, videos, PDFs, and other files together by year, with a review step before anything is copied.
 
-## Install on Windows
+> Independent community project. Not affiliated with or endorsed by Google.
 
-1. Open the project's **Releases** page on GitHub and choose the latest version.
-2. Download `TakeoutOrganizer-Setup-<version>.exe` and run it. The installer works for your Windows account and does not need administrator access. A desktop shortcut is optional.
-3. Start **Takeout Organizer** from the Start menu or desktop. The app opens without a terminal window.
+## Download and install
 
-> Once this project is published, its Releases page will contain the installer download. Tagged releases (`v1.0.0`, for example) automatically build and attach it.
+After this project is published, open its **Releases** page and download the latest installer, for example GoogleTakeoutOrganizer-Setup-1.0.0.exe.
 
-## Start the app
+1. Run the installer. It installs for your Windows account and does not need administrator access or a separate Python installation.
+2. Optionally select a desktop shortcut.
+3. Open **Google Takeout Organizer** from the Start menu.
 
-1. For running from source, install Python 3.10 or newer from [python.org](https://www.python.org/downloads/windows/) and select **Add Python to PATH** (the Python Launcher is recommended). The Windows installer already bundles the app and does not require Python.
-2. Double-click `launch.vbs` to open the app without a terminal window. `launch.bat` is also available as a quick handoff to the hidden launcher. For a terminal-based start, open PowerShell here and run `py -3 app.py`.
-3. Use **1. Scan locations** to add or remove the source folders you want to organize. The Explorer picker supports Ctrl-click and Shift-click to add multiple folders at once. Each selected folder shows an estimated total size in GB, calculated in the background from file sizes only. Use **2. Output destination** to choose a separate folder where organized copies will be saved.
+The installer is not code-signed yet, so Windows may show a “protected your PC” or unknown-publisher warning. Only download it from this project's official GitHub Releases page.
 
-The app opens maximized on Windows so the scan, output, review, operation, and progress areas fit into one screen. You can still resize the window.
+## What it does
 
-Use the sun/moon button in the top-right corner to switch between light and dark mode.
+- Scans only folders you add. The scan list starts empty; it does not scan your computer automatically.
+- Combines files from separate Takeout parts into one Data/year folder when the source names identify a year.
+- Uses year-labelled folder names to group every file type under Data/year. For other files, local file-extension and name rules suggest a category. Uncertain files go to **Review Needed**.
+- Shows an output preview, existing-name matches, duplicate warnings, and file sizes before applying.
+- Copies and verifies files using file size and SHA-256 checks. The default operation is **Copy**, so source files remain in place.
+- Supports progress, phase-specific ETA, cancellation, a persistent operation log, and Undo for unchanged output files.
+- Works offline and does not send file names or contents to an online AI service. No paid API is required.
 
-## Safe workflow
+## Example
 
-- **Scan** recursively lists files under selected locations. It does not write to source or destination folders. The scan list starts empty; add only the folders you want to organize.
-- Windows, Program Files, Program Files (x86), ProgramData, AppData, WindowsApps, Recovery, System Volume Information, Recycle Bin, and common boot/system folders are skipped. Junctions and symbolic links are not followed. Permission errors are skipped.
-- **Analyze files (local rules)** re-applies local filename, path, and extension rules to the scanned files. Obvious file types are categorized by extension; uncertain files go to **Review Needed**. Names suggesting coursework, projects, or resumes are placed into those categories. The app does not include or configure an AI model, so it does not contact a service or require an API key.
-- Every file type found inside a clearly year-labelled source folder is grouped by year under one `Data` directory. For example, PDFs, videos, documents, and photos from `photo 2025` all target `Data/2025`, and `photo 24` and `photo 2024` both target `Data/2024`. Duplicate filenames get safe unique names such as `image (2).jpg`.
-- To use an optional local classifier, integrate a function that accepts a `pathlib.Path` and returns a category string (or `None`), then pass it as `ai_classifier` to `organizer.classify` or extend the Analyze button to call it. The classifier is intentionally an interface hook rather than a bundled model; no model is downloaded or contacted by default.
-- **Preview Changes** shows source path, destination, reason, size, and filename conflicts. The app starts in **DRY RUN** mode.
-- The **Review needed** tab lists uncertain file types and destination conflicts. The **Existing output** tab separately shows same-named files anywhere below the chosen output root, including deep year folders and the existing/incoming sizes, plus a total unique-file count and size. Select matches and use **Copy selected existing files into their source folder** to preserve them under `Existing data in <output name> - <parent name>` beside their corresponding source folder, or choose **Move selected existing files to source folder** to copy and verify them there before separately confirming removal from output. Both options are conflict-safe and logged for Undo. If there is more than one match, select the exact existing path to replace. Replace backs up the old file for Undo; you can instead keep both under a unique name or exclude the incoming file. Apply is blocked while any review item is undecided. The **Output preview** tab shows the final destination and decision for every scanned file before copying.
-- For a large Review needed list, click **Select review files with no same-named output file** to select only review rows whose filenames do not appear in the current output destination. Click **Preview Changes** after scanning or changing review decisions first so the existing-output list is refreshed. Then use the review actions on the selected rows.
-- **Apply Changes** requires that you first view **Preview Changes** after the last scan, analysis, review decision, or destination edit. This keeps the displayed destination plan current before confirmation.
-- Immediately before copying, a storage preflight checks the destination drive's free space against the staged copy size, replacement backup sizes, and a safety reserve. If free space is insufficient or the drive cannot be checked, Apply is stopped before copying and a warning explains why. This cannot predict a device disconnect or new writes that consume space after the check.
-- During Apply, the progress bar tracks the batch copy phase up to 99%, then pulses at 99% while SHA-256 verification runs. The line beside it shows the current filename and a rough ETA based on measured throughput. Cancellation during copying or verification removes staged temporary files; already published verified files remain logged.
-- Scan locations start empty. Select folders to add; the app does not preselect Desktop, Downloads, Documents, Pictures, or Videos.
-- The operation menu offers **Copy**, **Move**, and **Copy, but delete source**, for all files or selected preview rows. Copy leaves originals untouched. Move and Copy, but delete source both copy and verify first, then ask separately before removing unchanged originals. The Remove selected button only excludes a row from this run.
-- Reusing the same output root reuses its existing `Data/<year>` folders. When a target filename already exists, Review offers keeping both under a unique name or replacing the existing output after saving a backup for Undo.
-- **Apply Changes** requires confirmation and copies in 1 MiB chunks. It verifies file size and SHA-256, uses a temporary file before publishing, and never intentionally overwrites an existing destination. Originals remain in place.
-- **Cancel** stops between chunks/files and discards the active temporary copy.
-- **Undo** requires confirmation and removes only logged destination copies whose current hash still matches the hash at copy time. Modified/newer files are preserved. Original files are never deleted.
-- The persistent operation log is stored at `<destination>/.ai-file-organizer/operations.jsonl`.
+Files spread across several Takeout parts:
 
-No real files are scanned or modified during development. Always review the preview and confirm the destination before applying.
+~~~text
+Takeout export/
+├── Part 1/
+│   └── photo 2025/
+│       ├── trip.jpg
+│       └── notes.pdf
+├── Part 2/
+│   └── photo 2025/
+│       └── video.mp4
+└── Part 3/
+    └── photo 2024/
+        └── family.png
+~~~
+
+With an output destination you choose, the year-labelled files are grouped together:
+
+~~~text
+My Organized Files/
+└── Data/
+    ├── 2024/
+    │   └── family.png
+    └── 2025/
+        ├── notes.pdf
+        ├── trip.jpg
+        └── video.mp4
+~~~
+
+Duplicate names are kept with conflict-safe names, such as trip (2).jpg. Existing output files are never silently overwritten or discarded.
+
+## Use it
+
+1. **Add scan locations.** Click the input-folder button and choose one or more folders. In the Windows picker, use Ctrl-click or Shift-click to select multiple folders. Their approximate sizes appear next to them.
+2. **Choose an output destination.** Pick the root folder where the organized result should live. For example, if the destination is D:\My Organized Files, the app creates Data inside it as needed.
+3. Click **Scan**, then **Analyze with AI**. Despite the button label, this version uses local filename, path, and extension rules; it has no bundled AI model and does not call an online AI service. Ambiguous items are sent to Review.
+4. Review **Output Preview**, **Review Needed**, and **Existing Output**. Select uncertain items and decide where they should go, keep both versions, replace an existing output with a backup, or exclude an item from this run.
+5. Choose **Copy** or another operation for the whole batch or selected files. **Move** and **Copy, but delete source** require a separate confirmation after a verified copy has been made.
+6. Click **Apply Changes** only after previewing the plan. Use **Cancel** to stop an active batch, or **Undo** to roll back logged outputs that have not been changed since.
+
+The existing-output search checks the selected destination, including nested folders. It compares file names, not file contents.
+
+## Safety and privacy
+
+- The default operation is **Copy** and the app starts in **DRY RUN**. It does not move or delete files automatically.
+- No files are changed until you confirm **Apply Changes**.
+- System and protected directories are skipped. Junctions and symbolic links are not followed. Permission errors are reported or skipped.
+- Copies are staged, checked, and published without intentionally overwriting a destination. Failed or cancelled temporary copies are removed.
+- Optional source cleanup happens only after verification and a separate confirmation. Use Copy if you want to preserve every original.
+- Undo preserves any destination file that was edited or replaced after the organizer created it.
+- Operation history is kept in the .ai-file-organizer/operations.jsonl folder under your chosen destination.
+- Scanning and organizing happen locally. There is no sign-in, telemetry, or online classifier.
+
+## Uninstall
+
+Use **Settings → Apps → Installed apps → Google Takeout Organizer → Uninstall**. Removing the application does not remove organized files or operation logs from your chosen output folder.
+
+## Troubleshooting
+
+- **A file is in Review Needed:** the current local rules could not confidently choose a destination. Select the row and choose a destination or exclude it before applying.
+- **The output drive has insufficient space:** choose another destination or free space, then preview and apply again. The app checks available space before starting a batch.
+- **An existing file is reported:** review the match and choose keep both, replace with a backup, or exclude the incoming file. Replacing is never automatic.
+- **Windows warns about the installer:** releases are not code-signed yet. Download only from the repository's Releases page and review the publisher warning before continuing.
+
+## Run from source
+
+For development or to run without the installer, install Python 3.10 or newer on Windows, then from this folder run:
+
+~~~powershell
+py -3 app.py
+~~~
+
+Or double-click launch.vbs to start the app without leaving a terminal window. The Windows installer already bundles the runtime, so end users do not need Python.
 
 ## Tests
 
-Run the temporary-directory safety suite with:
+Run the safety suite against temporary test folders:
 
-```powershell
+~~~powershell
 py -3 -m unittest discover -s tests -v
-```
+~~~
 
-To run the checked-in synthetic example (and create `sample_data/organized_demo_output_v2/Data/2024` and `Data/2025` while keeping the sample originals), run:
+The suite currently has 172 passing tests, including cases for duplicate names, failed copies, cancellation, permission errors, and rollback. The 100 age-persona cases are scripted checks, not a study with human participants. No personal folders are used by the test suite.
 
-```powershell
+A synthetic example is available separately:
+
+~~~powershell
 py -3 run_sample_demo.py
-```
+~~~
 
-The suite covers dry-run behavior, duplicate names, conflicts, hash verification, failed copies, cancellation, permission handling, and rollback safety.
+It writes to sample_data/organized_demo_output_v2/ and leaves the sample source files in place.
 
-## Build the Windows installer yourself
+## Build a Windows installer
 
-The app can be bundled into a standalone Windows program with PyInstaller and wrapped in a per-user installer with NSIS. Both are free tools. Install PyInstaller and NSIS first, then run in PowerShell from the project folder:
+The GitHub Actions workflow runs the test suite and builds a standalone app with PyInstaller, then creates a per-user setup program with NSIS. Both build tools are free. The workflow stores a downloadable build artifact for branch builds. A version tag such as v1.0.0 also creates a GitHub Release and attaches GoogleTakeoutOrganizer-Setup-1.0.0.exe.
 
-```powershell
+To build locally, install PyInstaller and NSIS, then run in PowerShell:
+
+~~~powershell
 py -3 -m pip install pyinstaller
-py -3 -m PyInstaller --clean --noconfirm --onefile --windowed --name TakeoutOrganizer --add-data "assets/google-takeout-organizer-logo.png;assets" app.py
-& "${env:ProgramFiles(x86)}\NSIS\makensis.exe" /DAPP_VERSION=1.0.0 packaging\TakeoutOrganizer.nsi
-```
+py -3 -m PyInstaller --clean --noconfirm --onefile --windowed --name GoogleTakeoutOrganizer --add-data "assets/takeout-organizer-logo.png;assets" app.py
+& "C:\Program Files (x86)\NSIS\makensis.exe" /DAPP_VERSION=1.0.0 packaging\TakeoutOrganizer.nsi
+~~~
 
-The installer is written to `dist\TakeoutOrganizer-Setup-1.0.0.exe`. GitHub Actions runs this build on pushes and pull requests. To publish a downloadable release, push a version tag such as `v1.0.0`; the workflow attaches the installer to that GitHub Release. The repository owner must first create a GitHub repository and push this project to it.
+The installer is written to dist\GoogleTakeoutOrganizer-Setup-1.0.0.exe.
+
+## Repository setup
+
+Suggested GitHub repository name: google-takeout-organizer.
+
+Suggested description:
+
+> Safely organize Google Takeout exports into year-based folders with preview, duplicate handling, verified copies, and undo.
+
+Select the **Python** .gitignore template. The project already has a Python-focused .gitignore that also excludes generated builds and sample output logs. Leave GitHub's **Add a README** option off because this project already has a detailed README.
+
+The reference project uses the MIT License. MIT is a good match if you want others to freely use, modify, and redistribute this code while preserving the copyright and license notice. The current project does not yet include a LICENSE file; select MIT only if you intend to grant those permissions. A public GitHub repository without a license does not automatically permit reuse. When the new repository is created with an initial Python .gitignore and MIT license, its first commit will need to be merged with this project's existing local commit before pushing.
+
+## Project layout
+
+~~~text
+.github/workflows/   Windows test, build, and release workflow
+assets/              App logo
+packaging/           NSIS installer definition
+sample_data/         Synthetic Takeout example files
+tests/               Automated safety tests
+app.py               Windows desktop interface
+organizer.py         Scanning, classification, copy, verify, and undo logic
+~~~

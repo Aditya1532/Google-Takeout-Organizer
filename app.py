@@ -94,7 +94,7 @@ def _select_multiple_folders(owner_hwnd=0):
 class OrganizerApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        root.title("Takeout Organizer")
+        root.title("Google Takeout Organizer")
         root.geometry("1280x760")
         root.minsize(1024, 620)
         self.dark_mode = False
@@ -211,7 +211,7 @@ class OrganizerApp:
     def _build(self):
         brand = ttk.Frame(self.root, padding=(10, 2, 10, 0))
         brand.pack(fill="x")
-        logo_path = Path(__file__).parent / "assets" / "google-takeout-organizer-logo.png"
+        logo_path = Path(__file__).parent / "assets" / "takeout-organizer-logo.png"
         try:
             logo = tk.PhotoImage(file=str(logo_path))
             scale = max(1, (max(logo.width(), logo.height()) + 55) // 56)
@@ -219,7 +219,7 @@ class OrganizerApp:
             ttk.Label(brand, image=self.logo_image).pack(side="left", padx=(0, 8))
         except (tk.TclError, OSError):
             self.logo_image = None
-        ttk.Label(brand, text="Takeout Organizer", font=("Segoe UI", 18, "bold")).pack(side="left", anchor="center")
+        ttk.Label(brand, text="Google Takeout Organizer", font=("Segoe UI", 18, "bold")).pack(side="left", anchor="center")
         self.theme_button = ttk.Button(brand, text=self._theme_button_label(), command=self.toggle_theme)
         self.theme_button.pack(side="right", padx=(8, 0))
 
